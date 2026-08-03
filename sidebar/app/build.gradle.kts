@@ -2,7 +2,6 @@
 plugins {
     alias(libs.plugins.com.android.application)
     alias(libs.plugins.org.jetbrains.kotlin.android)
-    alias(libs.plugins.hiddenApiRefine)
     alias(libs.plugins.ksp)
 }
 
@@ -58,7 +57,6 @@ dependencies {
     implementation(libs.material)
     implementation(libs.preference.ktx)
     implementation(libs.room.runtime)
-    implementation(libs.hiddenapibypass)
     implementation(libs.appiconloader)
     implementation(libs.rikka.recyclerview.adapter)
     implementation(libs.rikka.recyclerview.ktx)
@@ -70,8 +68,6 @@ dependencies {
     implementation(libs.accompanist.drawablepainter)
     ksp(libs.room.compiler)
     implementation(libs.room.ktx)
-    compileOnly(files("libs/XposedBridgeAPI-89.jar"))
-    compileOnly(projects.hiddenApi)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.espresso.core)

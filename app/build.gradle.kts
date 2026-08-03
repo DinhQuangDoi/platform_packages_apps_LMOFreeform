@@ -3,7 +3,6 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.hiddenApiRefine)
 }
 
 android {
@@ -60,12 +59,10 @@ dependencies {
     implementation(libs.room.runtime)
     implementation(platform(libs.compose.bom))
     implementation(platform(libs.compose.bom))
-    implementation(libs.hiddenapirefineruntime)
     androidTestImplementation(platform(libs.compose.bom))
     androidTestImplementation(platform(libs.compose.bom))
     ksp(libs.room.compiler)
     implementation(libs.room.ktx)
-    implementation(libs.hiddenapibypass)
     implementation(libs.systemuicontroller)
     implementation(projects.service)
     implementation(platform(libs.compose.bom))
@@ -75,7 +72,6 @@ dependencies {
     androidTestImplementation(platform(libs.compose.bom))
 
     compileOnly(files("libs/XposedBridgeAPI-89.jar"))
-    compileOnly(projects.hiddenApi)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)

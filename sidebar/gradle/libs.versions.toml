@@ -11,10 +11,8 @@ appcompat = "1.6.1"
 material = "1.8.0"
 rikka-appcompat = "1.6.1"
 rikka-material = "2.7.0"
-hidden-api-refine = "4.3.0"
 room = "2.5.1"
 preference = "1.2.1"
-hidden-api-bypass = "4.3"
 appiconloader = "1.5.0"
 rikka-recyclerview-adapter = "1.3.0"
 rikka-recyclerview-ktx = "1.3.1"
@@ -36,15 +34,9 @@ material = { group = "dev.rikka.rikkax.material", name = "material", version.ref
 preference-ktx = { group = "androidx.preference", name = "preference-ktx", version.ref = "preference" }
 
 
-hiddenapirefineannotationprocessor = { group = "dev.rikka.tools.refine", name = "annotation-processor", version.ref = "hidden-api-refine"}
-hiddenapirefineannotation = { group = "dev.rikka.tools.refine", name = "annotation", version.ref = "hidden-api-refine"}
-hiddenapirefineruntime = { group = "dev.rikka.tools.refine", name = "runtime", version.ref = "hidden-api-refine"}
-
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room"}
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room"}
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room"}
-
-hiddenapibypass = { module = "org.lsposed.hiddenapibypass:hiddenapibypass", version.ref = "hidden-api-bypass" }
 
 appiconloader = { group = "me.zhanghai.android.appiconloader", name = "appiconloader", version.ref = "appiconloader" }
 
@@ -60,7 +52,6 @@ accompanist-drawablepainter = { group = "com.google.accompanist", name = "accomp
 com-android-application = { id = "com.android.application", version.ref = "agp" }
 org-jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "org-jetbrains-kotlin-android" }
 com-android-library = { id = "com.android.library", version.ref = "agp" }
-hiddenApiRefine = { id = "dev.rikka.tools.refine", version.ref = "hidden-api-refine" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 
 [bundles]

@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.androidApplication)
-    alias(libs.plugins.hiddenApiRefine)
     alias(libs.plugins.kotlinAndroid)
 }
 
@@ -25,7 +24,5 @@ android {
 dependencies {
     implementation(libs.gson)
     implementation(projects.service)
-    implementation(libs.hiddenapirefineruntime)
-    compileOnly(projects.hiddenApi)
     compileOnly(files("libs/XposedBridgeAPI-89.jar"))
 }
