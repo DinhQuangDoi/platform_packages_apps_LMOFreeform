@@ -1,7 +1,6 @@
 [versions]
 agp = "8.1.1"
 kotlin = "1.8.10"
-zygote-loader = "3.0"
 core-ktx = "1.10.1"
 ksp = "1.8.10-1.0.9"
 junit = "4.13.2"
@@ -15,7 +14,6 @@ androidx-appcompat-appcompat = "1.6.1"
 constraintlayout = "2.1.4"
 com-google-android-material-material = "1.9.0"
 hidden-api-bypass = "4.3"
-magic-library = "1.5"
 hidden-api-refine = "4.3.0"
 foundation = "1.4.0"
 systemuicontroller = "0.33.0-alpha"
@@ -65,8 +63,6 @@ systemuicontroller = { group = "com.google.accompanist", name = "accompanist-sys
 
 hiddenapibypass = { module = "org.lsposed.hiddenapibypass:hiddenapibypass", version.ref = "hidden-api-bypass" }
 
-magic-library = { group = "com.github.kr328.magic", name = "library", version.ref = "magic-library"}
-
 hiddenapirefineannotationprocessor = { group = "dev.rikka.tools.refine", name = "annotation-processor", version.ref = "hidden-api-refine"}
 hiddenapirefineannotation = { group = "dev.rikka.tools.refine", name = "annotation", version.ref = "hidden-api-refine"}
 hiddenapirefineruntime = { group = "dev.rikka.tools.refine", name = "runtime", version.ref = "hidden-api-refine"}
@@ -84,7 +80,6 @@ androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 hiddenApiRefine = { id = "dev.rikka.tools.refine", version.ref = "hidden-api-refine" }
-zygoteLoader = { id = "com.github.kr328.gradle.zygote", version.ref = "zygote-loader"}
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 
 [bundles]

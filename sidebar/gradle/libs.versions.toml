@@ -9,8 +9,6 @@ androidx-test-ext-junit = "1.1.5"
 espresso-core = "3.5.1"
 appcompat = "1.6.1"
 material = "1.8.0"
-zygote-loader = "3.0"
-magic-library = "1.5"
 rikka-appcompat = "1.6.1"
 rikka-material = "2.7.0"
 hidden-api-refine = "4.3.0"
@@ -38,8 +36,6 @@ material = { group = "dev.rikka.rikkax.material", name = "material", version.ref
 preference-ktx = { group = "androidx.preference", name = "preference-ktx", version.ref = "preference" }
 
 
-magic-library = { group = "com.github.kr328.magic", name = "library", version.ref = "magic-library"}
-
 hiddenapirefineannotationprocessor = { group = "dev.rikka.tools.refine", name = "annotation-processor", version.ref = "hidden-api-refine"}
 hiddenapirefineannotation = { group = "dev.rikka.tools.refine", name = "annotation", version.ref = "hidden-api-refine"}
 hiddenapirefineruntime = { group = "dev.rikka.tools.refine", name = "runtime", version.ref = "hidden-api-refine"}
@@ -63,7 +59,6 @@ accompanist-drawablepainter = { group = "com.google.accompanist", name = "accomp
 [plugins]
 com-android-application = { id = "com.android.application", version.ref = "agp" }
 org-jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "org-jetbrains-kotlin-android" }
-zygoteLoader = { id = "com.github.kr328.gradle.zygote", version.ref = "zygote-loader"}
 com-android-library = { id = "com.android.library", version.ref = "agp" }
 hiddenApiRefine = { id = "dev.rikka.tools.refine", version.ref = "hidden-api-refine" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
