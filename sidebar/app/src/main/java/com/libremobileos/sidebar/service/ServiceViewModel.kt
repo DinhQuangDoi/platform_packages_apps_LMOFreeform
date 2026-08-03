@@ -307,7 +307,7 @@ class ServiceViewModel(private val application: Application): AndroidViewModel(a
 
     private fun SidebarAppsEntity.toAppInfo(): AppInfo {
         if (!application.isResizeableActivity(packageName, activityName)) {
-            throw Exception("activity is not resizeable")
+            logger.w("toAppInfo: activity is not resizeable, but adding anyway: $packageName/$activityName")
         }
         val info = application.packageManager.getApplicationInfo(
             packageName,

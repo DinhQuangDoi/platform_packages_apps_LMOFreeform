@@ -81,8 +81,7 @@ class AllAppViewModel(private val application: Application): AndroidViewModel(ap
                 }
                 if (launchIntent != null && launchIntent.component != null) {
                     if (!application.isResizeableActivity(launchIntent.component!!)) {
-                        logger.d("onPackageAdded: activity not resizeable, skipped ${launchIntent.component}")
-                        return
+                        logger.d("onPackageAdded: activity not resizeable, but adding anyway: ${launchIntent.component}")
                     }
                     viewModelScope.launch(Dispatchers.IO) {
                         allAppList.add(
@@ -156,18 +155,17 @@ class AllAppViewModel(private val application: Application): AndroidViewModel(ap
                 list.forEach { info ->
                     val component = info.componentName
                     if (!application.isResizeableActivity(component)) {
-                        logger.d("activity not resizeable, skipped $component")
-                    } else {
-                        allAppList.add(
-                            AppInfo(
-                                info.label.toString(),
-                                info.getBadgedIcon(0),
-                                component.packageName,
-                                component.className,
-                                userInfo.userId
-                            )
-                        )
+                        logger.d("activity not resizeable, but adding anyway: $component")
                     }
+                    allAppList.add(
+                        AppInfo(
+                            info.label.toString(),
+                            info.getBadgedIcon(0),
+                            component.packageName,
+                            component.className,
+                            userInfo.userId
+                        )
+                    )
                 }
             }
             Collections.sort(allAppList, appComparator)
