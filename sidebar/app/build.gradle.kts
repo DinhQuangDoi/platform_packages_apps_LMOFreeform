@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.com.android.application)
     alias(libs.plugins.org.jetbrains.kotlin.android)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.hiddenApiRefine)
 }
 
 android {
@@ -66,6 +67,9 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.accompanist.drawablepainter)
+    compileOnly(projects.hiddenApi)
+    implementation(libs.hiddenapirefineruntime)
+    implementation(libs.hiddenapibypass)
     ksp(libs.room.compiler)
     implementation(libs.room.ktx)
     testImplementation(libs.junit)

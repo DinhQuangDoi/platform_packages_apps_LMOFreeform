@@ -57,6 +57,8 @@ class SidebarView(
     }
 
     companion object {
+        private const val PRIVATE_FLAG_TRUSTED_OVERLAY = 0x10
+        private const val PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY = 0x20
         private const val OFFSET_X = 90
         private const val PACKAGE = "com.libremobileos.freeform"
         private const val ACTION = "com.libremobileos.freeform.START_FREEFORM"
@@ -88,8 +90,8 @@ class SidebarView(
             type = LayoutParams.TYPE_APPLICATION_OVERLAY
             flags = LayoutParams.FLAG_LAYOUT_IN_SCREEN or
                     LayoutParams.FLAG_HARDWARE_ACCELERATED
-            privateFlags = LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY or
-                    LayoutParams.PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY
+            privateFlags = PRIVATE_FLAG_TRUSTED_OVERLAY or
+                    PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY
             format = PixelFormat.RGBA_8888
             windowAnimations = android.R.style.Animation_Dialog
             layoutInDisplayCutoutMode = LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER

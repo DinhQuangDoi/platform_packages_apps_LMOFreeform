@@ -2,135 +2,160 @@ package com.libremobileos.sidebar.ui.sidebar
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.res.stringResource
-import androidx.navigation.compose.rememberNavController
-import com.android.settingslib.spa.framework.compose.localNavController
-import com.android.settingslib.spa.framework.compose.rememberDrawablePainter
-import com.android.settingslib.spa.framework.theme.SettingsDimension
-import com.android.settingslib.spa.widget.preference.MainSwitchPreference
-import com.android.settingslib.spa.widget.preference.SwitchPreference
-import com.android.settingslib.spa.widget.preference.SwitchPreferenceModel
-import com.android.settingslib.spa.widget.scaffold.SettingsScaffold
-import com.android.settingslib.spa.widget.ui.Category
+import androidx.compose.ui.unit.dp
+import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.libremobileos.sidebar.R
 import com.libremobileos.sidebar.bean.SidebarAppInfo
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SidebarSettingsPage(
     viewModel: SidebarSettingsViewModel
 ) {
-    val navController = rememberNavController()
     var mainChecked = rememberSaveable { mutableStateOf(viewModel.getSidebarEnabled()) }
 
-    CompositionLocalProvider(navController.localNavController()) {
-        SettingsScaffold(
-            title = stringResource(R.string.sidebar_label)
-        ) { paddingValues ->
-            Column(
-                modifier = Modifier.padding(paddingValues)
-            ) {
-                MainSwitchPreference(object : SwitchPreferenceModel {
-                    override val title = stringResource(R.string.enable_sideline)
-                    override val checked = { mainChecked.value }
-                    override val changeable = { viewModel.isEnabled }
-                    override val onCheckedChange: (Boolean) -> Unit = {
-                        mainChecked.value = it
-                        viewModel.setSidebarEnabled(it)
-                    }
-                })
-                if (mainChecked.value) {
-                    SidebarSettingSwitch(
-                        title = stringResource(R.string.sidebar_predicted_apps),
-                        summary = stringResource(R.string.sidebar_predicted_apps_summary),
-                        isChecked = viewModel.getPredictedAppsEnabled(),
-                        onCheckedChange = { viewModel.setPredictedAppsEnabled(it) }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.sidebar_label)) }
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier.padding(paddingValues)
+        ) {
+            ListItem(
+                headlineContent = { Text(stringResource(R.string.enable_sideline)) },
+                trailingContent = {
+                    Switch(
+                        checked = mainChecked.value,
+                        onCheckedChange = {
+                            mainChecked.value = it
+                            viewModel.setSidebarEnabled(it)
+                        },
+                        enabled = viewModel.isEnabled
                     )
-                    SidebarAppList(viewModel)
                 }
+            )
+
+            if (mainChecked.value) {
+                DividerLine()
+
+                var predictedChecked = rememberSaveable {
+                    mutableStateOf(viewModel.getPredictedAppsEnabled())
+                }
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.sidebar_predicted_apps)) },
+                    supportingContent = {
+                        Text(stringResource(R.string.sidebar_predicted_apps_summary))
+                    },
+                    trailingContent = {
+                        Switch(
+                            checked = predictedChecked.value,
+                            onCheckedChange = {
+                                predictedChecked.value = it
+                                viewModel.setPredictedAppsEnabled(it)
+                            }
+                        )
+                    }
+                )
+
+                DividerLine()
+                SidebarAppList(viewModel)
             }
         }
     }
 }
 
+@Composable
+private fun DividerLine() {
+    Spacer(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(1.dp)
+            .drawBehind {
+                drawLine(color = MaterialTheme.colorScheme.outlineVariant)
+            }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SidebarAppList(
     viewModel: SidebarSettingsViewModel
 ) {
     val sidebarApps by viewModel.appListFlow.collectAsState()
-    Category(
-        title = stringResource(R.string.sidebar_app_setting_label)
-    ) {
-        LazyColumn {
-            items(sidebarApps) { appInfo ->
-                SidebarAppListItem(
-                    appInfo = appInfo,
-                    onCheckedChange = { isChecked ->
-                        if (isChecked) {
-                            viewModel.addSidebarApp(appInfo)
-                        } else {
-                            viewModel.deleteSidebarApp(appInfo)
-                        }
+
+    Text(
+        text = stringResource(R.string.sidebar_app_setting_label),
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
+    )
+
+    LazyColumn {
+        items(sidebarApps) { appInfo ->
+            SidebarAppListItem(
+                appInfo = appInfo,
+                onCheckedChange = { isChecked ->
+                    if (isChecked) {
+                        viewModel.addSidebarApp(appInfo)
+                    } else {
+                        viewModel.deleteSidebarApp(appInfo)
                     }
-                )
-            }
+                }
+            )
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SidebarAppListItem(
     appInfo: SidebarAppInfo,
     onCheckedChange: (Boolean) -> Unit
 ) {
     var appChecked = rememberSaveable { mutableStateOf(appInfo.isSidebarApp) }
-    SwitchPreference(
-        model = object : SwitchPreferenceModel {
-            override val title = appInfo.label
-            override val icon = @Composable {
-                Image(
-                    painter = rememberDrawablePainter(appInfo.icon),
-                    contentDescription = appInfo.label,
-                    modifier = Modifier.size(SettingsDimension.appIconItemSize)
-                )
-            }
-            override val checked = { appChecked.value }
-            override val onCheckedChange: (Boolean) -> Unit = {
-                appChecked.value = it
-                onCheckedChange(it)
-            }
+    ListItem(
+        headlineContent = { Text(appInfo.label) },
+        leadingContent = {
+            Image(
+                painter = rememberDrawablePainter(appInfo.icon),
+                contentDescription = appInfo.label,
+                modifier = Modifier.size(40.dp)
+            )
         },
-    )
-}
-
-@Composable
-fun SidebarSettingSwitch(
-    title: String,
-    summary: String?,
-    isChecked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
-) {
-    var myChecked = rememberSaveable { mutableStateOf(isChecked) }
-    SwitchPreference(
-        model = object : SwitchPreferenceModel {
-            override val title = title
-            override val summary = { summary ?: "" }
-            override val checked = { myChecked.value }
-            override val onCheckedChange: (Boolean) -> Unit = {
-                myChecked.value = it
-                onCheckedChange(it)
-            }
-        },
+        trailingContent = {
+            Switch(
+                checked = appChecked.value,
+                onCheckedChange = {
+                    appChecked.value = it
+                    onCheckedChange(it)
+                }
+            )
+        }
     )
 }

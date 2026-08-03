@@ -73,6 +73,10 @@ class SidebarService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         get() = if (isPortrait) OFFSET_PORTRAIT else OFFSET_LANDSCAPE
 
     companion object {
+        private const val SYSTEM_FLAG_SHOW_FOR_ALL_USERS = 0x80
+        private const val PRIVATE_FLAG_TRUSTED_OVERLAY = 0x10
+        private const val PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY = 0x20
+
         private const val TAG = "SidebarService"
         private const val SIDELINE_WIDTH = 100
         //侧边条移动时的宽度
@@ -216,8 +220,11 @@ class SidebarService : Service(), SharedPreferences.OnSharedPreferenceChangeList
     private fun constrainY(y: Int): Int {
         // Avoid moving sideline into statusbar or navbar region
         val sbHeight = SystemBarUtils.getStatusBarHeight(this)
-        val navbarHeight = if (isPortrait) {
-            resources.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_height)
+        val navbarResId = resources.getIdentifier(
+            "navigation_bar_height", "dimen", "android"
+        )
+        val navbarHeight = if (navbarResId != 0) {
+            if (isPortrait) resources.getDimensionPixelSize(navbarResId) else 0
         } else {
             0
         }
@@ -245,9 +252,9 @@ class SidebarService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             flags = LayoutParams.FLAG_NOT_FOCUSABLE or
                     LayoutParams.FLAG_NOT_TOUCH_MODAL or
                     LayoutParams.FLAG_HARDWARE_ACCELERATED
-            privateFlags = LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS or
-                    LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY or
-                    LayoutParams.PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY
+            privateFlags = SYSTEM_FLAG_SHOW_FOR_ALL_USERS or
+                    PRIVATE_FLAG_TRUSTED_OVERLAY or
+                    PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY
             format = PixelFormat.RGBA_8888
             windowAnimations = android.R.style.Animation_Dialog
         }

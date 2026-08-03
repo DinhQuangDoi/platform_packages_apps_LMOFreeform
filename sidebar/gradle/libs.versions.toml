@@ -22,6 +22,8 @@ ui = "1.6.0-alpha02"
 material3 = "1.2.0-alpha04"
 ui-graphics = "1.6.0-alpha02"
 accompanist-drawablepainter = "0.35.1-alpha"
+hidden-api-refine = "4.3.0"
+hidden-api-bypass = "4.3"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
@@ -48,11 +50,16 @@ androidx-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "ui" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics", version.ref = "ui-graphics" }
 accompanist-drawablepainter = { group = "com.google.accompanist", name = "accompanist-drawablepainter", version.ref = "accompanist-drawablepainter" }
+hiddenapirefineannotationprocessor = { group = "dev.rikka.tools.refine", name = "annotation-processor", version.ref = "hidden-api-refine" }
+hiddenapirefineannotation = { group = "dev.rikka.tools.refine", name = "annotation", version.ref = "hidden-api-refine" }
+hiddenapirefineruntime = { group = "dev.rikka.tools.refine", name = "runtime", version.ref = "hidden-api-refine" }
+hiddenapibypass = { group = "org.lsposed.hiddenapibypass", name = "hiddenapibypass", version.ref = "hidden-api-bypass" }
 [plugins]
 com-android-application = { id = "com.android.application", version.ref = "agp" }
 org-jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "org-jetbrains-kotlin-android" }
 com-android-library = { id = "com.android.library", version.ref = "agp" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+hiddenApiRefine = { id = "dev.rikka.tools.refine", version.ref = "hidden-api-refine" }
 
 [bundles]
 

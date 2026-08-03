@@ -12,7 +12,10 @@ fun Application.isResizeableActivity(component: ComponentName): Boolean {
     return runCatching { packageManager.getActivityInfo(component, /* flags */ 0) }
         .onFailure { Log.e(MAIN_TAG, "failed to get activity info for $component: $it") }
         .getOrNull()
-        ?.let { ActivityInfo.isResizeableMode(it.resizeMode) }
+        ?.let {
+            it.resizeMode == ActivityInfo.RESIZE_MODE_RESIZEABLE
+                || it.resizeMode == ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION
+        }
         ?: false
 }
 
@@ -26,5 +29,9 @@ fun Application.getBadgedIcon(appInfo: ApplicationInfo, userHandle: UserHandle):
     )
 
 fun Application.getBadgedIcon(appInfo: ApplicationInfo, userId: Int): Drawable =
-    getBadgedIcon(appInfo, UserHandle.of(userId))
+    getBadgedIcon(
+        appInfo,
+        UserHandle::class.java.getDeclaredMethod("of", Integer.TYPE)
+            .invoke(null, userId) as UserHandle
+    )
 

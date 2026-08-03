@@ -5,9 +5,11 @@ import android.os.UserHandle
 import android.os.UserManager
 import com.libremobileos.sidebar.bean.SidebarUserInfo
 
+@Suppress("UNCHECKED_CAST")
 fun UserManager.getSidebarFilteredUsers(): List<SidebarUserInfo> {
     val myUserId = UserHandle.myUserId()
-    return users
+    return (UserManager::class.java.getDeclaredMethod("getUsers")
+        .invoke(this) as List<UserInfo>)
         .filter { isSidebarUserAllowed(it) }
         .map { userInfo ->
             SidebarUserInfo(
@@ -24,11 +26,17 @@ fun UserManager.getSidebarFilteredUsers(): List<SidebarUserInfo> {
 
 fun UserManager.isSidebarUserAllowed(userInfo: UserInfo): Boolean {
     val myUserId = UserHandle.myUserId()
-    // must be either current user, or current user's parallel space or unlocked profile
     return userInfo.id == myUserId ||
         userInfo.parallelParentId == myUserId ||
-        (userInfo.profileGroupId == myUserId && !isQuietModeEnabled(userInfo.userHandle))
+        (userInfo.profileGroupId == myUserId &&
+            !(UserManager::class.java.getDeclaredMethod(
+                "isQuietModeEnabled", UserHandle::class.java
+            ).invoke(this, userInfo.userHandle) as Boolean))
 }
 
 fun UserManager.isSidebarUserAllowed(userId: Int): Boolean =
-    isSidebarUserAllowed(getUserInfo(userId))
+    isSidebarUserAllowed(
+        UserManager::class.java.getDeclaredMethod(
+            "getUserInfo", Integer.TYPE
+        ).invoke(this, userId) as UserInfo
+    )

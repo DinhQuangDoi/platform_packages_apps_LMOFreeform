@@ -18,10 +18,12 @@ fun <T> List<T>.contains(element: T, predicate: (T, T) -> Boolean): Boolean {
 }
 
 fun List<AppInfo>.getInfo(packageName: String, userHandle: UserHandle): AppInfo? {
+    val handleId = UserHandle::class.java.getDeclaredMethod("getIdentifier")
+        .invoke(userHandle) as Int
     for (item in this) {
         if (
             item.packageName == packageName &&
-            item.userId == userHandle.identifier) return item
+            item.userId == handleId) return item
     }
     return null
 }

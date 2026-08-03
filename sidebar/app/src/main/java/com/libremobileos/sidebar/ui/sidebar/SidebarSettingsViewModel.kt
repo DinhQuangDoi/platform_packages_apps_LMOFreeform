@@ -4,8 +4,6 @@ import android.app.Application
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.Intent.ACTION_PROFILE_AVAILABLE
-import android.content.Intent.ACTION_PROFILE_UNAVAILABLE
 import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.content.pm.LauncherApps
@@ -68,15 +66,14 @@ class SidebarSettingsViewModel(private val application: Application) : AndroidVi
             sp = appContext.getSharedPreferences(SidebarApplication.CONFIG, Context.MODE_PRIVATE)
 
             initAllAppList()
-            appContext.registerReceiverAsUser(
+            registerReceiverAsUser(
+                appContext,
                 userProfileReceiver,
-                UserHandle.CURRENT,
+                currentUserHandle,
                 IntentFilter().apply {
                     addAction(ACTION_PROFILE_AVAILABLE)
                     addAction(ACTION_PROFILE_UNAVAILABLE)
                 },
-                null,
-                null
             )
         }
     }
@@ -126,7 +123,10 @@ class SidebarSettingsViewModel(private val application: Application) : AndroidVi
                         allAppList.add(
                             SidebarAppInfo(
                                 "${info.label}${userInfo.suffix}",
-                                info.getBadgedIcon(0),
+                                application.packageManager.getUserBadgedIcon(
+                                    info.getIcon(0),
+                                    userInfo.userHandle
+                                ),
                                 component.packageName,
                                 component.className,
                                 userInfo.userId,
@@ -148,12 +148,35 @@ class SidebarSettingsViewModel(private val application: Application) : AndroidVi
     }
 
     companion object {
+        private const val ACTION_PROFILE_AVAILABLE = "android.intent.action.PROFILE_AVAILABLE"
+        private const val ACTION_PROFILE_UNAVAILABLE = "android.intent.action.PROFILE_UNAVAILABLE"
+
         val Factory = viewModelFactory {
             initializer {
                 SidebarSettingsViewModel(
                     this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY]!!
                 )
             }
+        }
+
+        val currentUserHandle: UserHandle by lazy {
+            UserHandle::class.java.getDeclaredField("CURRENT").get(null) as UserHandle
+        }
+
+        fun registerReceiverAsUser(
+            context: Context,
+            receiver: BroadcastReceiver,
+            user: UserHandle,
+            filter: IntentFilter,
+        ): Intent? {
+            return Context::class.java.getDeclaredMethod(
+                "registerReceiverAsUser",
+                BroadcastReceiver::class.java,
+                UserHandle::class.java,
+                IntentFilter::class.java,
+                String::class.java,
+                android.os.Handler::class.java,
+            ).invoke(context, receiver, user, filter, null, null) as Intent?
         }
     }
 

@@ -8,8 +8,6 @@ import android.app.prediction.AppTarget
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.Intent.ACTION_PROFILE_AVAILABLE
-import android.content.Intent.ACTION_PROFILE_UNAVAILABLE
 import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
@@ -135,7 +133,7 @@ class ServiceViewModel(private val application: Application): AndroidViewModel(a
                         val info = application.packageManager.getApplicationInfo(target.packageName, PackageManager.GET_ACTIVITIES)
                         val launchIntent = application.packageManager.getLaunchIntentForPackage(target.packageName)
                         val component = launchIntent!!.component!!
-                        val userId = target.user.identifier
+                        val userId = getUserIdentifier(target.user)
                         if (!application.isResizeableActivity(component)) {
                             logger.d("appPredictionCallback: activity is not resizeable, skipped $target")
                             null
@@ -158,7 +156,7 @@ class ServiceViewModel(private val application: Application): AndroidViewModel(a
     private val userProfileReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             val user: UserHandle = intent.getParcelableExtra(Intent.EXTRA_USER) ?: return
-            val userId = user.identifier
+            val userId = getUserIdentifier(user)
             logger.d("userProfileReceiver received ${intent.action} $user")
             when (intent.action) {
                 ACTION_PROFILE_AVAILABLE -> {
@@ -198,7 +196,34 @@ class ServiceViewModel(private val application: Application): AndroidViewModel(a
         private const val ALL_APP_PACKAGE = "com.libremobileos.sidebar"
         private const val ALL_APP_ACTIVITY = "com.libremobileos.sidebar.ui.all_app.AllAppActivity"
         private const val MAX_PREDICTED_APPS = 6
+        private const val ACTION_PROFILE_AVAILABLE = "android.intent.action.PROFILE_AVAILABLE"
+        private const val ACTION_PROFILE_UNAVAILABLE = "android.intent.action.PROFILE_UNAVAILABLE"
         const val KEY_SHOW_PREDICTED_APPS = "sidebar_show_predicted_apps"
+
+        val currentUserHandle: UserHandle by lazy {
+            UserHandle::class.java.getDeclaredField("CURRENT").get(null) as UserHandle
+        }
+
+        fun getUserIdentifier(user: UserHandle): Int {
+            return UserHandle::class.java.getDeclaredMethod("getIdentifier")
+                .invoke(user) as Int
+        }
+
+        fun registerReceiverAsUser(
+            context: Context,
+            receiver: BroadcastReceiver,
+            user: UserHandle,
+            filter: IntentFilter,
+        ): Intent? {
+            return Context::class.java.getDeclaredMethod(
+                "registerReceiverAsUser",
+                BroadcastReceiver::class.java,
+                UserHandle::class.java,
+                IntentFilter::class.java,
+                String::class.java,
+                android.os.Handler::class.java,
+            ).invoke(context, receiver, user, filter, null, null) as Intent?
+        }
     }
 
     init {
@@ -261,15 +286,14 @@ class ServiceViewModel(private val application: Application): AndroidViewModel(a
     }
 
     private fun registerUserProfileReceiver() {
-        appContext.registerReceiverAsUser(
+        registerReceiverAsUser(
+            appContext,
             userProfileReceiver,
-            UserHandle.CURRENT,
+            currentUserHandle,
             IntentFilter().apply {
                 addAction(ACTION_PROFILE_AVAILABLE)
                 addAction(ACTION_PROFILE_UNAVAILABLE)
             },
-            null,
-            null
         )
     }
 

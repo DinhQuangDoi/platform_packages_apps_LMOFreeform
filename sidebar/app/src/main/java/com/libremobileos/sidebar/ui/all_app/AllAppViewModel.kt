@@ -4,8 +4,6 @@ import android.app.Application
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.Intent.ACTION_PROFILE_AVAILABLE
-import android.content.Intent.ACTION_PROFILE_UNAVAILABLE
 import android.content.IntentFilter
 import android.content.pm.LauncherApps
 import android.content.pm.PackageManager
@@ -74,7 +72,7 @@ class AllAppViewModel(private val application: Application): AndroidViewModel(ap
             runCatching {
                 val info = application.packageManager.getApplicationInfo(packageName, PackageManager.GET_ACTIVITIES)
                 val launchIntent = application.packageManager.getLaunchIntentForPackage(packageName)
-                val userId = user.identifier
+                val userId = getUserIdentifier(user)
                 if (!userManager.isSidebarUserAllowed(userId)) {
                     logger.d("onPackageAdded: $packageName userId=$userId not allowed")
                     return
@@ -130,15 +128,14 @@ class AllAppViewModel(private val application: Application): AndroidViewModel(ap
         logger.d("init")
         initAllAppList()
         launcherApps.registerCallback(launcherAppsCallback)
-        appContext.registerReceiverAsUser(
+        registerReceiverAsUser(
+            appContext,
             userProfileReceiver,
-            UserHandle.CURRENT,
+            currentUserHandle,
             IntentFilter().apply {
                 addAction(ACTION_PROFILE_AVAILABLE)
                 addAction(ACTION_PROFILE_UNAVAILABLE)
             },
-            null,
-            null
         )
     }
 
@@ -160,7 +157,10 @@ class AllAppViewModel(private val application: Application): AndroidViewModel(ap
                     allAppList.add(
                         AppInfo(
                             info.label.toString(),
-                            info.getBadgedIcon(0),
+                            application.packageManager.getUserBadgedIcon(
+                                info.getIcon(0),
+                                userInfo.userHandle
+                            ),
                             component.packageName,
                             component.className,
                             userInfo.userId
@@ -174,12 +174,40 @@ class AllAppViewModel(private val application: Application): AndroidViewModel(ap
     }
 
     companion object {
+        private const val ACTION_PROFILE_AVAILABLE = "android.intent.action.PROFILE_AVAILABLE"
+        private const val ACTION_PROFILE_UNAVAILABLE = "android.intent.action.PROFILE_UNAVAILABLE"
+
         val Factory = viewModelFactory {
             initializer {
                 AllAppViewModel(
                     this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY]!!
                 )
             }
+        }
+
+        val currentUserHandle: UserHandle by lazy {
+            UserHandle::class.java.getDeclaredField("CURRENT").get(null) as UserHandle
+        }
+
+        fun getUserIdentifier(user: UserHandle): Int {
+            return UserHandle::class.java.getDeclaredMethod("getIdentifier")
+                .invoke(user) as Int
+        }
+
+        fun registerReceiverAsUser(
+            context: Context,
+            receiver: BroadcastReceiver,
+            user: UserHandle,
+            filter: IntentFilter,
+        ): Intent? {
+            return Context::class.java.getDeclaredMethod(
+                "registerReceiverAsUser",
+                BroadcastReceiver::class.java,
+                UserHandle::class.java,
+                IntentFilter::class.java,
+                String::class.java,
+                android.os.Handler::class.java,
+            ).invoke(context, receiver, user, filter, null, null) as Intent?
         }
     }
 
