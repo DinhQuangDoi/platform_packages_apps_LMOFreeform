@@ -7,7 +7,8 @@ import com.libremobileos.sidebar.bean.SidebarUserInfo
 
 @Suppress("UNCHECKED_CAST")
 fun UserManager.getSidebarFilteredUsers(): List<SidebarUserInfo> {
-    val myUserId = UserHandle.myUserId()
+    val myUserId = UserHandle::class.java.getDeclaredMethod("myUserId")
+        .invoke(null) as Int
     return (UserManager::class.java.getDeclaredMethod("getUsers")
         .invoke(this) as List<UserInfo>)
         .filter { isSidebarUserAllowed(it) }
@@ -25,7 +26,8 @@ fun UserManager.getSidebarFilteredUsers(): List<SidebarUserInfo> {
 }
 
 fun UserManager.isSidebarUserAllowed(userInfo: UserInfo): Boolean {
-    val myUserId = UserHandle.myUserId()
+    val myUserId = UserHandle::class.java.getDeclaredMethod("myUserId")
+        .invoke(null) as Int
     return userInfo.id == myUserId ||
         userInfo.parallelParentId == myUserId ||
         (userInfo.profileGroupId == myUserId &&

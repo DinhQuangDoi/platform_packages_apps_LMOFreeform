@@ -92,12 +92,17 @@ fun SidebarSettingsPage(
 
 @Composable
 private fun DividerLine() {
+    val color = MaterialTheme.colorScheme.outlineVariant
     Spacer(
         modifier = Modifier
             .fillMaxWidth()
             .height(1.dp)
             .drawBehind {
-                drawLine(color = MaterialTheme.colorScheme.outlineVariant)
+                drawLine(
+                    color = color,
+                    start = Offset(0f, 0f),
+                    end = Offset(size.width, 0f)
+                )
             }
     )
 }

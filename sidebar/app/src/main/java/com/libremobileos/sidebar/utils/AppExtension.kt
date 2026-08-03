@@ -13,8 +13,10 @@ fun Application.isResizeableActivity(component: ComponentName): Boolean {
         .onFailure { Log.e(MAIN_TAG, "failed to get activity info for $component: $it") }
         .getOrNull()
         ?.let {
-            it.resizeMode == ActivityInfo.RESIZE_MODE_RESIZEABLE
-                || it.resizeMode == ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION
+            val resizeMode = ActivityInfo::class.java.getDeclaredField("resizeMode")
+                .getInt(it)
+            resizeMode == 2 /* RESIZE_MODE_RESIZEABLE */ ||
+                resizeMode == 1 /* RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION */
         }
         ?: false
 }

@@ -44,7 +44,8 @@ class SidebarSettingsViewModel(private val application: Application) : AndroidVi
     private val _appList = MutableStateFlow<List<SidebarAppInfo>>(emptyList())
     private val appComparator = AppComparator()
 
-    val isEnabled = UserHandle.myUserId() == 0
+    val isEnabled = (UserHandle::class.java.getDeclaredMethod("myUserId")
+        .invoke(null) as Int) == 0
     private val appContext = application.applicationContext
     private lateinit var launcherApps: LauncherApps
     private lateinit var userManager: UserManager

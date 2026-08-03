@@ -90,11 +90,14 @@ class SidebarView(
             type = LayoutParams.TYPE_APPLICATION_OVERLAY
             flags = LayoutParams.FLAG_LAYOUT_IN_SCREEN or
                     LayoutParams.FLAG_HARDWARE_ACCELERATED
-            privateFlags = PRIVATE_FLAG_TRUSTED_OVERLAY or
-                    PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY
             format = PixelFormat.RGBA_8888
             windowAnimations = android.R.style.Animation_Dialog
             layoutInDisplayCutoutMode = LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
+        }
+        LayoutParams::class.java.getDeclaredField("privateFlags").apply {
+            isAccessible = true
+            setInt(layoutParams, PRIVATE_FLAG_TRUSTED_OVERLAY or
+                PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY)
         }
 
         updateSidebarPosition()

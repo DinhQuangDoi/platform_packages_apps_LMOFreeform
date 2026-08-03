@@ -98,7 +98,8 @@ class SidebarService : Service(), SharedPreferences.OnSharedPreferenceChangeList
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        userId = UserHandle.myUserId()
+        userId = UserHandle::class.java.getDeclaredMethod("myUserId")
+            .invoke(null) as Int
         if (userId != 0) {
             logger.d("not starting for non-system user $userId")
             stopSelf()
@@ -252,11 +253,14 @@ class SidebarService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             flags = LayoutParams.FLAG_NOT_FOCUSABLE or
                     LayoutParams.FLAG_NOT_TOUCH_MODAL or
                     LayoutParams.FLAG_HARDWARE_ACCELERATED
-            privateFlags = SYSTEM_FLAG_SHOW_FOR_ALL_USERS or
-                    PRIVATE_FLAG_TRUSTED_OVERLAY or
-                    PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY
             format = PixelFormat.RGBA_8888
             windowAnimations = android.R.style.Animation_Dialog
+        }
+        LayoutParams::class.java.getDeclaredField("privateFlags").apply {
+            isAccessible = true
+            setInt(layoutParams, SYSTEM_FLAG_SHOW_FOR_ALL_USERS or
+                PRIVATE_FLAG_TRUSTED_OVERLAY or
+                PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY)
         }
 
         sideLineView.setSystemGestureExclusionRects(
