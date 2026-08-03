@@ -97,7 +97,7 @@ class FreeformTaskStackListener(
             // if (FreeformWindowManager.settings.showImeInFreeform) {
             //     SystemServiceHolder.windowManager.setDisplayImePolicy(displayId, 0)
             // }
-            taskId = taskInfo.taskId
+            taskId = taskInfo?.taskId ?: return
             dlog(TAG, "onTaskMovedToFront $taskId")
         }
     }
@@ -105,7 +105,7 @@ class FreeformTaskStackListener(
     override fun onTaskDescriptionChanged(taskInfo: ActivityManager.RunningTaskInfo?) {
         val displayId = runningTaskDisplayId(taskInfo) ?: return
         if (this.displayId == displayId) {
-            taskId = taskInfo.taskId
+            taskId = taskInfo?.taskId ?: return
             dlog(TAG, "onTaskDescriptionChanged $taskInfo")
         }
     }
@@ -117,7 +117,7 @@ class FreeformTaskStackListener(
     override fun onTaskRemovalStarted(taskInfo: ActivityManager.RunningTaskInfo?) {
         val displayId = runningTaskDisplayId(taskInfo) ?: return
         if (this.displayId == displayId) {
-            taskId = taskInfo.taskId
+            taskId = taskInfo?.taskId ?: return
             dlog(TAG, "onTaskRemovalStarted $taskId")
             // window.removeView()
         }

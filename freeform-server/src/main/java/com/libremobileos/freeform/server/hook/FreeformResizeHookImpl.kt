@@ -25,7 +25,7 @@ object FreeformResizeHookImpl {
         installHook(
             "setResizeMode",
             Int::class.javaPrimitiveType!!,
-            object : XC_MethodHook() {
+            callback = object : XC_MethodHook() {
                 override fun beforeHookedMethod(param: MethodHookParam) {
                     val task = param.thisObject
                     if (isForceResizeableTask(task)) {
@@ -36,7 +36,7 @@ object FreeformResizeHookImpl {
         )
         installHook(
             "getResizeMode",
-            object : XC_MethodHook() {
+            callback = object : XC_MethodHook() {
                 override fun beforeHookedMethod(param: MethodHookParam) {
                     if (isForceResizeableTask(param.thisObject)) {
                         param.result = 1
@@ -49,7 +49,8 @@ object FreeformResizeHookImpl {
     private fun installHook(methodName: String, vararg params: Any, callback: XC_MethodHook) {
         try {
             val args = params.toMutableList().apply { add(callback) }.toTypedArray()
-            XposedHelpers.findAndHookMethod(TASK_CLASS, methodName, *args)
+            val loader = FreeformResizeHookImpl::class.java.classLoader
+            XposedHelpers.findAndHookMethod(TASK_CLASS, loader, methodName, *args)
             Slog.i(TAG, "hooked Task#$methodName")
         } catch (t: Throwable) {
             Slog.w(TAG, "failed to hook Task#$methodName: ${t.javaClass.simpleName}: ${t.message}")
