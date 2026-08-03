@@ -3,6 +3,7 @@ package com.libremobileos.sidebar.receiver
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import com.libremobileos.sidebar.service.SidebarService
 import com.libremobileos.sidebar.utils.Logger
 import java.util.logging.Handler
@@ -20,7 +21,12 @@ class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == BOOT) {
             logger.d("Boot Completed")
-            context.startService(Intent(context, SidebarService::class.java))
+            val serviceIntent = Intent(context, SidebarService::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(serviceIntent)
+            } else {
+                context.startService(serviceIntent)
+            }
         }
     }
 }
