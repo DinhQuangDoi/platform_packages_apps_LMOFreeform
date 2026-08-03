@@ -250,6 +250,15 @@ class FreeformWindow(
     }
 
     fun measureSize() {
+        val perAppConfig = WindowConfigStore.get(appConfig.packageName)
+        if (perAppConfig != null && !freeformConfig.isHangUp) {
+            freeformConfig.apply {
+                width = perAppConfig.width
+                height = perAppConfig.height
+                dlog(TAG, "measureSize: using per-app config width=$width height=$height")
+            }
+            return
+        }
         val isPortrait = defaultDisplayRotation == Surface.ROTATION_0 ||
                 defaultDisplayRotation == Surface.ROTATION_180
         freeformConfig.apply {
@@ -319,6 +328,8 @@ class FreeformWindow(
             type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
             width = WindowManager.LayoutParams.WRAP_CONTENT
             height = WindowManager.LayoutParams.WRAP_CONTENT
+            x = WindowConfigStore.get(appConfig.packageName)?.x ?: 0
+            y = WindowConfigStore.get(appConfig.packageName)?.y ?: 0
             flags = WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
                     WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                     WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
@@ -423,6 +434,23 @@ class FreeformWindow(
 
     fun getFreeformId(): String {
         return "${appConfig.packageName},${appConfig.activityName},${appConfig.userId}"
+    }
+
+    /**
+     * Remember the current size/position for this package so the next time it is
+     * opened in freeform the user's last bounds are restored.
+     */
+    fun saveWindowConfig() {
+        if (freeformConfig.isHangUp) return
+        dlog(TAG, "saveWindowConfig: size=${freeformConfig.width}x${freeformConfig.height} pos=(${windowParams.x},${windowParams.y})")
+        WindowConfigStore.update(appConfig.packageName) { config ->
+            config.copy(
+                width = freeformConfig.width,
+                height = freeformConfig.height,
+                x = windowParams.x,
+                y = windowParams.y
+            )
+        }
     }
 
     fun close() {

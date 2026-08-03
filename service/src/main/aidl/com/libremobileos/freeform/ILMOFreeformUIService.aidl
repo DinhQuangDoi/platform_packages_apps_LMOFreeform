@@ -23,4 +23,8 @@ interface ILMOFreeformUIService {
     void resizeFreeform(IBinder appToken, int width, int height, int densityDpi) = 3;
     void releaseFreeform(IBinder appToken) = 4;
     boolean ping() = 5;
+    // per-app freeform window config
+    void setWindowConfig(String packageName, int width, int height, int x, int y, boolean forceResizeable) = 6;
+    void removeWindowConfig(String packageName) = 7;
+    String getWindowConfigs() = 8;
 }

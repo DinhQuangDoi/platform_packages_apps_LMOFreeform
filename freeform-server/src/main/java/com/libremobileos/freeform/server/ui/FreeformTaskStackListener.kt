@@ -47,11 +47,18 @@ class FreeformTaskStackListener(
         clearedTask: Boolean,
         wasVisible: Boolean
     ) {
-
+        // Reload detection: an already-running activity is being relaunched (likely because of
+        // a config/display change when moving it into freeform).
+        dlog(TAG, "onActivityRestartAttempt task=$task homeTaskVisible=$homeTaskVisible clearedTask=$clearedTask wasVisible=$wasVisible")
+        if (task != null && this.displayId == task.displayId) {
+            Slog.w(TAG, "RELOAD: activity of ${task.topActivity} relaunched on freeform display (clearedTask=$clearedTask, wasVisible=$wasVisible)")
+        }
     }
 
     override fun onActivityForcedResizable(packageName: String, taskId: Int, reason: Int) {
-
+        // Letterbox detection: WM forced this (non-resizeable) activity into a letterbox.
+        dlog(TAG, "onActivityForcedResizable packageName=$packageName taskId=$taskId reason=$reason")
+        Slog.w(TAG, "LETTERBOX: $packageName taskId=$taskId reason=$reason ${reasonText(reason)}")
     }
 
     override fun onActivityDismissingDockedTask() {
@@ -73,7 +80,7 @@ class FreeformTaskStackListener(
     }
 
     override fun onTaskCreated(taskId: Int, componentName: ComponentName?) {
-
+        dlog(TAG, "onTaskCreated $taskId $componentName")
     }
 
     override fun onTaskRemoved(taskId: Int) {
@@ -194,5 +201,14 @@ class FreeformTaskStackListener(
 
     override fun onTaskSnapshotInvalidated(taskId: Int) {
 
+    }
+
+    private fun reasonText(reason: Int): String = when (reason) {
+        1 -> "RESIZE_MODE_RESIZEABLE"
+        2 -> "RESIZE_MODE_PRESERVE_WINDOW"
+        3 -> "RESIZE_MODE_FORCE_RESIZEABLE"
+        4 -> "RESIZE_MODE_SYSTEM"
+        5 -> "RESIZE_MODE_SYSTEM_SCREEN_ROTATION"
+        else -> "UNKNOWN($reason)"
     }
 }

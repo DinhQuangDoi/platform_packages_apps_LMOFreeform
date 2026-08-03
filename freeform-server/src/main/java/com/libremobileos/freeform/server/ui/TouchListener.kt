@@ -34,6 +34,7 @@ class MoveTouchListener(
             }
             MotionEvent.ACTION_UP -> {
                 window.makeSureFreeformInScreen()
+                window.saveWindowConfig()
             }
         }
         return true
@@ -125,6 +126,7 @@ class ScaleTouchListener(private val window: FreeformWindow, private val isRight
                         window.freeformConfig.densityDpi
                     )
                     window.freeformView.surfaceTexture!!.setDefaultBufferSize(window.freeformConfig.freeformWidth, window.freeformConfig.freeformHeight)
+                    window.saveWindowConfig()
                 }
             }
         }

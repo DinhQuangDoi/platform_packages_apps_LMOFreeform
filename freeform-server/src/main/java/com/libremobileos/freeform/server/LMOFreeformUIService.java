@@ -20,7 +20,10 @@ import java.util.Map;
 
 import com.libremobileos.freeform.ILMOFreeformDisplayCallback;
 import com.libremobileos.freeform.ILMOFreeformUIService;
+import com.libremobileos.freeform.server.hook.FreeformResizeHook;
 import com.libremobileos.freeform.server.ui.FreeformWindowManager;
+import com.libremobileos.freeform.server.ui.WindowConfigEntry;
+import com.libremobileos.freeform.server.ui.WindowConfigStore;
 
 public class LMOFreeformUIService extends ILMOFreeformUIService.Stub {
 
@@ -43,6 +46,7 @@ public class LMOFreeformUIService extends ILMOFreeformUIService.Stub {
         // this.handler = displayManager.getHandler();
 
         SystemServiceHolder.init();
+        FreeformResizeHook.install();
         try {
             ServiceManager.addService(SERVICE_NAME, this);
             Map<String, IBinder> cache = new ArrayMap<>();
@@ -117,5 +121,31 @@ public class LMOFreeformUIService extends ILMOFreeformUIService.Stub {
         }
         // need inputManager is not null
         return lmoFreeformService.isRunning();
+    }
+
+    @Override
+    public void setWindowConfig(String packageName, int width, int height, int x, int y,
+                                boolean forceResizeable) {
+        if (Binder.getCallingUid() != SYSTEM_UID) {
+            throw new SecurityException("Caller must be system");
+        }
+        WindowConfigStore.put(packageName,
+                new WindowConfigEntry(width, height, x, y, forceResizeable));
+    }
+
+    @Override
+    public void removeWindowConfig(String packageName) {
+        if (Binder.getCallingUid() != SYSTEM_UID) {
+            throw new SecurityException("Caller must be system");
+        }
+        WindowConfigStore.remove(packageName);
+    }
+
+    @Override
+    public String getWindowConfigs() {
+        if (Binder.getCallingUid() != SYSTEM_UID) {
+            throw new SecurityException("Caller must be system");
+        }
+        return WindowConfigStore.allJson();
     }
 }

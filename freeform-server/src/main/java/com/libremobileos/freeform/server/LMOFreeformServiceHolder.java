@@ -25,6 +25,7 @@ import android.view.Surface;
 import com.libremobileos.freeform.ILMOFreeformDisplayCallback;
 import com.libremobileos.freeform.server.ui.AppConfig;
 import com.libremobileos.freeform.server.ui.FreeformConfig;
+import com.libremobileos.freeform.server.ui.WindowConfigStore;
 
 public class LMOFreeformServiceHolder {
     private static final String TAG = "LMOFreeform/LMOFreeformServiceManager";
@@ -68,8 +69,10 @@ public class LMOFreeformServiceHolder {
     public static boolean startApp(Context context, AppConfig appConfig, int displayId) {
         dlog(TAG, "startApp $appConfig displayId=$displayId");
         try {
+            ComponentName component = new ComponentName(appConfig.getPackageName(), appConfig.getActivityName());
+            logResizeability(context, component);
             Intent intent = new Intent();
-            intent.setComponent(new ComponentName(appConfig.getPackageName(), appConfig.getActivityName()));
+            intent.setComponent(component);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             intent.setAction(Intent.ACTION_MAIN);
             intent.addCategory(Intent.CATEGORY_LAUNCHER);
@@ -81,6 +84,20 @@ public class LMOFreeformServiceHolder {
         } catch (Exception e) {
             Slog.e(TAG, "startApp failed", e);
             return false;
+        }
+    }
+
+    private static void logResizeability(Context context, ComponentName component) {
+        try {
+            android.content.pm.ActivityInfo info =
+                    context.getPackageManager().getActivityInfo(component, 0);
+            boolean resizeable = android.content.pm.ActivityInfo.isResizeableMode(info.resizeMode);
+            boolean forced = WindowConfigStore.isForceResizeable(component.getPackageName());
+            Slog.i(TAG, "startApp resize check: " + component + " resizeMode=" + info.resizeMode
+                    + " isResizeable=" + resizeable + " forceResizeableRule=" + forced
+                    + (resizeable ? "" : " (may be letterboxed/reloaded)"));
+        } catch (Exception e) {
+            Slog.e(TAG, "failed to query activity info for " + component, e);
         }
     }
 
