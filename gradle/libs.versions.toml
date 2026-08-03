@@ -26,6 +26,7 @@ navigation-fragment-ktx = "2.5.3"
 navigation-ui-ktx = "2.5.3"
 rikka-appcompat = "1.2.0-rc01"
 rikka-material = "1.6.6"
+hidden-api-refine = "4.3.0"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
@@ -60,6 +61,8 @@ material = { group = "dev.rikka.rikkax.material", name = "material", version.ref
 systemuicontroller = { group = "com.google.accompanist", name = "accompanist-systemuicontroller", version.ref = "systemuicontroller"}
 
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+hiddenapirefineannotationprocessor = { group = "dev.rikka.tools.refine", name = "annotation-processor", version.ref = "hidden-api-refine" }
+hiddenapirefineannotation = { group = "dev.rikka.tools.refine", name = "annotation", version.ref = "hidden-api-refine" }
 
 glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
 

@@ -50,7 +50,7 @@ class FreeformTaskStackListener(
         // Reload detection: an already-running activity is being relaunched (likely because of
         // a config/display change when moving it into freeform).
         dlog(TAG, "onActivityRestartAttempt task=$task homeTaskVisible=$homeTaskVisible clearedTask=$clearedTask wasVisible=$wasVisible")
-        if (task != null && this.displayId == task.displayId) {
+        if (task != null && this.displayId == runningTaskDisplayId(task)) {
             Slog.w(TAG, "RELOAD: activity of ${task.topActivity} relaunched on freeform display (clearedTask=$clearedTask, wasVisible=$wasVisible)")
         }
     }
@@ -91,7 +91,7 @@ class FreeformTaskStackListener(
     }
 
     override fun onTaskMovedToFront(taskInfo: ActivityManager.RunningTaskInfo?) {
-        val displayId = taskInfo?.displayId ?: return
+        val displayId = runningTaskDisplayId(taskInfo) ?: return
         if (this.displayId == displayId) {
             // TODO: move to android.provider.Settings
             // if (FreeformWindowManager.settings.showImeInFreeform) {
@@ -103,7 +103,7 @@ class FreeformTaskStackListener(
     }
 
     override fun onTaskDescriptionChanged(taskInfo: ActivityManager.RunningTaskInfo?) {
-        val displayId = taskInfo?.displayId ?: return
+        val displayId = runningTaskDisplayId(taskInfo) ?: return
         if (this.displayId == displayId) {
             taskId = taskInfo.taskId
             dlog(TAG, "onTaskDescriptionChanged $taskInfo")
@@ -115,7 +115,7 @@ class FreeformTaskStackListener(
     }
 
     override fun onTaskRemovalStarted(taskInfo: ActivityManager.RunningTaskInfo?) {
-        val displayId = taskInfo?.displayId ?: return
+        val displayId = runningTaskDisplayId(taskInfo) ?: return
         if (this.displayId == displayId) {
             taskId = taskInfo.taskId
             dlog(TAG, "onTaskRemovalStarted $taskId")
@@ -201,6 +201,12 @@ class FreeformTaskStackListener(
 
     override fun onTaskSnapshotInvalidated(taskId: Int) {
 
+    }
+
+    private fun runningTaskDisplayId(taskInfo: ActivityManager.RunningTaskInfo?): Int? {
+        if (taskInfo == null) return null
+        // TaskInfo#displayId is @hide; read it reflectively.
+        return runCatching { taskInfo.javaClass.getField("displayId").getInt(taskInfo) }.getOrNull()
     }
 
     private fun reasonText(reason: Int): String = when (reason) {

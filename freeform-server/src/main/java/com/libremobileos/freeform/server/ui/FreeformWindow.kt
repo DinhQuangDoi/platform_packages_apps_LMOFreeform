@@ -49,7 +49,7 @@ class FreeformWindow(
     private var displayId = Display.INVALID_DISPLAY
     var defaultDisplayWidth = context.resources.displayMetrics.widthPixels
     var defaultDisplayHeight = context.resources.displayMetrics.heightPixels
-    var defaultDisplayRotation = context.display.rotation
+    var defaultDisplayRotation = context.display?.rotation ?: 0
     private val hangUpGestureListener = HangUpGestureListener(this)
     private val defaultDisplayInfo = DisplayInfo()
     private val destroyRunnable = Runnable { destroy("destroyRunnable", true) }
@@ -59,7 +59,7 @@ class FreeformWindow(
             dlog(TAG, "onRotationChanged($rotation)")
             defaultDisplayWidth = context.resources.displayMetrics.widthPixels
             defaultDisplayHeight = context.resources.displayMetrics.heightPixels
-            defaultDisplayRotation = context.display.rotation
+            defaultDisplayRotation = context.display?.rotation ?: 0
             measureSize()
             handler.post {
                 changeOrientation()
@@ -241,11 +241,22 @@ class FreeformWindow(
     private fun populateFreeformConfig() {
         measureSize()
         measureScale()
-        context.display.getDisplayInfo(defaultDisplayInfo)
+        refreshDefaultDisplayInfo()
         freeformConfig.apply {
             refreshRate = defaultDisplayInfo.refreshRate
             presentationDeadlineNanos = defaultDisplayInfo.presentationDeadlineNanos
             dlog(TAG, "populateFreeformConfig: $this")
+        }
+    }
+
+    private fun refreshDefaultDisplayInfo() {
+        val display = context.display ?: return
+        runCatching {
+            android.view.Display::class.java
+                .getMethod("getDisplayInfo", DisplayInfo::class.java)
+                .invoke(display, defaultDisplayInfo)
+        }.onFailure { e ->
+            Slog.e(TAG, "refreshDefaultDisplayInfo failed: $e")
         }
     }
 
@@ -344,7 +355,7 @@ class FreeformWindow(
             windowManagerInt.registerDisplaySecureContentListener(this)
         }.onFailure {
             Slog.e(TAG, "addView failed: $it")
-            return false
+            return@addFreeformView false
         }
         return true
     }

@@ -32,6 +32,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
@@ -88,8 +89,8 @@ fun WindowConfigScreen(viewModel: WindowConfigViewModel) {
                 items(configs.keys.sorted()) { packageName ->
                     val config = configs[packageName] ?: return@items
                     ListItem(
-                        headlineContent = { Text(packageName) },
-                        supportingContent = {
+                        headlineText = { Text(packageName) },
+                        supportingText = {
                             Text(
                                 "${config.width}x${config.height} at " +
                                     "(${config.x},${config.y})" +
@@ -177,6 +178,7 @@ fun AppPickerDialog(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConfigEditorDialog(
     packageName: String,
@@ -221,8 +223,8 @@ fun ConfigEditorDialog(
                     )
                 }
                 ListItem(
-                    headlineContent = { Text("Force resizeable") },
-                    supportingContent = { Text("Prevent letterboxing and activity reload") },
+                    headlineText = { Text("Force resizeable") },
+                    supportingText = { Text("Prevent letterboxing and activity reload") },
                     trailingContent = {
                         Switch(
                             checked = forceResizeable,

@@ -24,5 +24,6 @@ android {
 dependencies {
     implementation(libs.gson)
     implementation(projects.service)
+    compileOnly(projects.hiddenApi)
     compileOnly(files("libs/XposedBridgeAPI-89.jar"))
 }

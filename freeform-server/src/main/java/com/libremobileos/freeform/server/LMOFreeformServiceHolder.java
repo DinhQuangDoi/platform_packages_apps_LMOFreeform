@@ -9,6 +9,7 @@ import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.IIntentSender;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -79,7 +80,8 @@ public class LMOFreeformServiceHolder {
             ActivityOptions activityOptions = ActivityOptions.makeBasic();
             activityOptions.setLaunchDisplayId(displayId);
             activityOptions.setCallerDisplayId(displayId);
-            context.startActivityAsUser(intent, activityOptions.toBundle(), new UserHandle(appConfig.getUserId()));
+            startActivityAsUser(context, intent, activityOptions.toBundle(),
+                    new UserHandle(appConfig.getUserId()));
             return true;
         } catch (Exception e) {
             Slog.e(TAG, "startApp failed", e);
@@ -91,7 +93,9 @@ public class LMOFreeformServiceHolder {
         try {
             android.content.pm.ActivityInfo info =
                     context.getPackageManager().getActivityInfo(component, 0);
-            boolean resizeable = android.content.pm.ActivityInfo.isResizeableMode(info.resizeMode);
+            int mode = info.resizeMode;
+            // RESIZE_MODE_RESIZEABLE == 1, RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION == 2
+            boolean resizeable = mode == 1 || mode == 2;
             boolean forced = WindowConfigStore.isForceResizeable(component.getPackageName());
             Slog.i(TAG, "startApp resize check: " + component + " resizeMode=" + info.resizeMode
                     + " isResizeable=" + resizeable + " forceResizeableRule=" + forced
@@ -109,10 +113,14 @@ public class LMOFreeformServiceHolder {
         final IApplicationThread app = ActivityThread.currentActivityThread()
                     .getApplicationThread();
         try {
+            IIntentSender target = (IIntentSender) PendingIntent.class
+                    .getMethod("getTarget").invoke(pendingIntent);
+            IBinder whitelistToken = (IBinder) PendingIntent.class
+                    .getMethod("getWhitelistToken").invoke(pendingIntent);
             SystemServiceHolder.activityManager.sendIntentSender(
                     app,
-                    pendingIntent.getTarget(),
-                    pendingIntent.getWhitelistToken(),
+                    target,
+                    whitelistToken,
                     0,
                     null,
                     null,
@@ -120,8 +128,20 @@ public class LMOFreeformServiceHolder {
                     null,
                     activityOptions.toBundle()
             );
-        } catch (RemoteException e) {
+        } catch (Exception e) {
             Slog.e(TAG, "startPendingIntent failed!", e);
+        }
+    }
+
+    // Context#startActivityAsUser is @hide; call it reflectively.
+    private static void startActivityAsUser(Context context, Intent intent, Bundle options,
+                                            UserHandle user) {
+        try {
+            Context.class.getMethod("startActivityAsUser",
+                            Intent.class, Bundle.class, UserHandle.class)
+                    .invoke(context, intent, options, user);
+        } catch (Exception e) {
+            Slog.e(TAG, "startActivityAsUser failed", e);
         }
     }
 

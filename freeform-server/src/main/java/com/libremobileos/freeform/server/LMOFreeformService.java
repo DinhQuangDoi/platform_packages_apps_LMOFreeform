@@ -31,10 +31,18 @@ public class LMOFreeformService {
 
     public void injectInputEvent(InputEvent event, int displayId) {
         try {
-            event.setDisplayId(displayId);
+            setInputEventDisplayId(event, displayId);
             SystemServiceHolder.inputManagerService.injectInputEvent(event, 0);
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    // InputEvent#setDisplayId is @hide; call it reflectively.
+    private static void setInputEventDisplayId(InputEvent event, int displayId) throws Exception {
+        try {
+            event.getClass().getMethod("setDisplayId", int.class).invoke(event, displayId);
+        } catch (NoSuchMethodException ignored) {
         }
     }
 

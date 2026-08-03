@@ -22,7 +22,7 @@ data class WindowConfig(
 
 data class AppItem(val packageName: String, val label: String)
 
-class WindowConfigViewModel(application: Application) : AndroidViewModel(application) {
+class WindowConfigViewModel(private val app: Application) : AndroidViewModel(app) {
     private val gson = Gson()
     private val type = object : TypeToken<Map<String, WindowConfig>>() {}.type
 
@@ -70,7 +70,7 @@ class WindowConfigViewModel(application: Application) : AndroidViewModel(applica
 
     private fun loadApps() {
         viewModelScope.launch(Dispatchers.IO) {
-            val pm = application.packageManager
+            val pm = app.packageManager
             val list = pm.getInstalledApplications(PackageManager.GET_META_DATA)
                 .filter { it.enabled }
                 .mapNotNull { info ->

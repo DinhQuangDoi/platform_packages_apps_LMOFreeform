@@ -1,10 +1,10 @@
 package com.libremobileos.freeform.server.hook
 
 import android.content.ComponentName
-import android.content.pm.ActivityInfo
 import android.util.Slog
 import com.libremobileos.freeform.server.ui.WindowConfigStore
 import de.robv.android.xposed.XC_MethodHook
+import de.robv.android.xposed.XC_MethodHook.MethodHookParam
 import de.robv.android.xposed.XposedHelpers
 
 /**
@@ -22,17 +22,28 @@ object FreeformResizeHookImpl {
 
     @JvmStatic
     fun install() {
-        installHook("setResizeMode", Int::class.javaPrimitiveType) { param ->
-            val task = param.thisObject
-            if (isForceResizeableTask(task)) {
-                param.args[0] = ActivityInfo.RESIZE_MODE_RESIZEABLE
+        installHook(
+            "setResizeMode",
+            Int::class.javaPrimitiveType!!,
+            object : XC_MethodHook() {
+                override fun beforeHookedMethod(param: MethodHookParam) {
+                    val task = param.thisObject
+                    if (isForceResizeableTask(task)) {
+                        param.args[0] = 1
+                    }
+                }
             }
-        }
-        installHook("getResizeMode") { param ->
-            if (isForceResizeableTask(param.thisObject)) {
-                param.result = ActivityInfo.RESIZE_MODE_RESIZEABLE
+        )
+        installHook(
+            "getResizeMode",
+            object : XC_MethodHook() {
+                override fun beforeHookedMethod(param: MethodHookParam) {
+                    if (isForceResizeableTask(param.thisObject)) {
+                        param.result = 1
+                    }
+                }
             }
-        }
+        )
     }
 
     private fun installHook(methodName: String, vararg params: Any, callback: XC_MethodHook) {
