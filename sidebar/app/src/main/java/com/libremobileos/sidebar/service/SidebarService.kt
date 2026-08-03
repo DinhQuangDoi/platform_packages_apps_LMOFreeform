@@ -2,9 +2,6 @@ package com.libremobileos.sidebar.service
 
 import android.annotation.SuppressLint
 import android.app.IActivityManager
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.Service
 import android.app.UserSwitchObserver
 import android.content.Context
@@ -13,7 +10,6 @@ import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.graphics.PixelFormat
 import android.graphics.Rect
-import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.ServiceManager
@@ -77,9 +73,6 @@ class SidebarService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         get() = if (isPortrait) OFFSET_PORTRAIT else OFFSET_LANDSCAPE
 
     companion object {
-        private const val NOTIFICATION_CHANNEL_ID = "sidebar_service"
-        private const val NOTIFICATION_ID = 1
-
         private const val SYSTEM_FLAG_SHOW_FOR_ALL_USERS = 0x80
         private const val PRIVATE_FLAG_TRUSTED_OVERLAY = 0x10
         private const val PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY = 0x20
@@ -104,11 +97,6 @@ class SidebarService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         return null
     }
 
-    override fun onCreate() {
-        super.onCreate()
-        createNotificationChannel()
-    }
-
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         userId = UserHandle::class.java.getDeclaredMethod("myUserId")
             .invoke(null) as Int
@@ -126,19 +114,8 @@ class SidebarService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         screenHeight = resources.displayMetrics.heightPixels
         sharedPrefs = application.applicationContext.getSharedPreferences(SidebarApplication.CONFIG, Context.MODE_PRIVATE)
         sharedPrefs.registerOnSharedPreferenceChangeListener(this)
-        try {
-            iActivityManager.registerUserSwitchObserver(userSwitchObserver, TAG)
-        } catch (e: Exception) {
-            logger.e("registerUserSwitchObserver failed: ", e)
-        }
+        iActivityManager.registerUserSwitchObserver(userSwitchObserver, TAG)
         serviceStarted = true
-
-        val notification = Notification.Builder(this, NOTIFICATION_CHANNEL_ID)
-            .setContentTitle("Sidebar")
-            .setContentText("Sidebar is running")
-            .setSmallIcon(R.drawable.ic_notification)
-            .build()
-        startForeground(NOTIFICATION_ID, notification)
 
         sidebarView = SidebarView(this@SidebarService, viewModel, object : SidebarView.Callback {
             override fun onRemove() {
@@ -176,13 +153,8 @@ class SidebarService : Service(), SharedPreferences.OnSharedPreferenceChangeList
     override fun onDestroy() {
         super.onDestroy()
         if (!serviceStarted) return
-        stopForeground(STOP_FOREGROUND_REMOVE)
         sharedPrefs.unregisterOnSharedPreferenceChangeListener(this)
-        try {
-            iActivityManager.unregisterUserSwitchObserver(userSwitchObserver)
-        } catch (e: Exception) {
-            logger.e("unregisterUserSwitchObserver failed: ", e)
-        }
+        iActivityManager.unregisterUserSwitchObserver(userSwitchObserver)
         removeView(force = true)
         viewModel.destroy()
     }
@@ -284,15 +256,11 @@ class SidebarService : Service(), SharedPreferences.OnSharedPreferenceChangeList
             format = PixelFormat.RGBA_8888
             windowAnimations = android.R.style.Animation_Dialog
         }
-        try {
-            LayoutParams::class.java.getDeclaredField("privateFlags").apply {
-                isAccessible = true
-                setInt(layoutParams, SYSTEM_FLAG_SHOW_FOR_ALL_USERS or
-                    PRIVATE_FLAG_TRUSTED_OVERLAY or
-                    PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY)
-            }
-        } catch (e: Exception) {
-            logger.e("set privateFlags failed: ", e)
+        LayoutParams::class.java.getDeclaredField("privateFlags").apply {
+            isAccessible = true
+            setInt(layoutParams, SYSTEM_FLAG_SHOW_FOR_ALL_USERS or
+                PRIVATE_FLAG_TRUSTED_OVERLAY or
+                PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY)
         }
 
         sideLineView.setSystemGestureExclusionRects(
@@ -379,23 +347,11 @@ class SidebarService : Service(), SharedPreferences.OnSharedPreferenceChangeList
         logger.d("animateShowSideline")
         sideLineView.animate().translationX(0f).setDuration(300).start()
     }
-    private fun setIntSp(name: String, value: Int) {
 
+    private fun setIntSp(name: String, value: Int) {
         sharedPrefs.edit().apply {
             putInt(name, value)
             apply()
-        }
-    }
-
-    private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                NOTIFICATION_CHANNEL_ID,
-                "Sidebar Service",
-                NotificationManager.IMPORTANCE_MIN
-            )
-            val manager = getSystemService(NotificationManager::class.java)
-            manager.createNotificationChannel(channel)
         }
     }
 }
