@@ -84,7 +84,7 @@ final class DisplayDeviceInfo {
     /**
      * The supported modes of the display.
      */
-    public Display.Mode[] supportedModes = Display.Mode.EMPTY_ARRAY;
+    public Display.Mode[] supportedModes = new Display.Mode[0];
 
 
     /**

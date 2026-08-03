@@ -53,6 +53,6 @@ public final class Slog {
     }
 
     public static int e(String tag, Throwable tr) {
-        return Log.e(tag, tr);
+        return Log.e(tag, Log.getStackTraceString(tr));
     }
 }
