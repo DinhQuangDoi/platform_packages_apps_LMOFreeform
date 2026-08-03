@@ -9,4 +9,5 @@ android {
 dependencies {
     annotationProcessor(libs.hiddenapirefineannotationprocessor)
     compileOnly(libs.hiddenapirefineannotation)
+    compileOnly(project(":service"))
 }
