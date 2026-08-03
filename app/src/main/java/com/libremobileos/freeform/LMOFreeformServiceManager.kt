@@ -64,4 +64,23 @@ object LMOFreeformServiceManager {
     fun removeFreeform(freeformId: String) {
         iLMOFreeformService?.removeFreeform(freeformId)
     }
+
+    fun setWindowConfig(
+        packageName: String,
+        width: Int,
+        height: Int,
+        x: Int,
+        y: Int,
+        forceResizeable: Boolean
+    ) {
+        iLMOFreeformService?.setWindowConfig(packageName, width, height, x, y, forceResizeable)
+    }
+
+    fun removeWindowConfig(packageName: String) {
+        iLMOFreeformService?.removeWindowConfig(packageName)
+    }
+
+    fun getWindowConfigs(): String {
+        return runCatching { iLMOFreeformService?.getWindowConfigs() }.getOrNull() ?: "{}"
+    }
 }

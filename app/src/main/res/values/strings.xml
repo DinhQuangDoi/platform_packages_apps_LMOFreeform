@@ -1,3 +1,18 @@
 <resources>
     <string name="app_name">LMOFreeform</string>
+    <string name="window_config_title">Freeform per-app window</string>
+    <string name="window_config_add">Add rule</string>
+    <string name="window_config_delete">Delete</string>
+    <string name="window_config_edit">Edit</string>
+    <string name="window_config_save">Save</string>
+    <string name="window_config_cancel">Cancel</string>
+    <string name="window_config_pick_package">Pick an app</string>
+    <string name="window_config_force_resizeable">Force resizeable</string>
+    <string name="window_config_force_resizeable_summary">Prevent letterboxing and activity reload</string>
+    <string name="window_config_width">Width</string>
+    <string name="window_config_height">Height</string>
+    <string name="window_config_x">X</string>
+    <string name="window_config_y">Y</string>
+    <string name="window_config_no_rules">No per-app rules yet</string>
+    <string name="window_config_empty_packages">No launcher apps found</string>
 </resources>
