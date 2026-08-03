@@ -18,7 +18,7 @@ public class SystemServiceHolder {
     public static IWindowManager windowManager;
 
     static void init() {
-        activityTaskManager = IActivityTaskManager.Stub.asInterface(ServiceManager.getService(Context.ACTIVITY_TASK_SERVICE));
+        activityTaskManager = IActivityTaskManager.Stub.asInterface(ServiceManager.getService("activity_task"));
         activityManager = IActivityManager.Stub.asInterface(ServiceManager.getService(Context.ACTIVITY_SERVICE));
         inputManagerService = IInputManager.Stub.asInterface(ServiceManager.getService(Context.INPUT_SERVICE));
         windowManager = IWindowManager.Stub.asInterface(ServiceManager.getService(Context.WINDOW_SERVICE));

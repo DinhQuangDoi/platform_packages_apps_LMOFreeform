@@ -48,10 +48,13 @@ public class LMOFreeformUIService extends ILMOFreeformUIService.Stub {
         SystemServiceHolder.init();
         FreeformResizeHook.install();
         try {
-            ServiceManager.addService(SERVICE_NAME, this);
+            // ServiceManager#addService / #initServiceCache are @hide; call reflectively.
+            Class<?> serviceManager = ServiceManager.class;
+            serviceManager.getMethod("addService", String.class, IBinder.class)
+                    .invoke(null, SERVICE_NAME, this);
             Map<String, IBinder> cache = new ArrayMap<>();
             cache.put(SERVICE_NAME, this);
-            ServiceManager.initServiceCache(cache);
+            serviceManager.getMethod("initServiceCache", Map.class).invoke(null, cache);
             Slog.i(TAG, "add SystemService: " + ServiceManager.getService(SERVICE_NAME));
         } catch (Exception e) {
             Slog.e(TAG, "add " + SERVICE_NAME + " service failed: " + e);

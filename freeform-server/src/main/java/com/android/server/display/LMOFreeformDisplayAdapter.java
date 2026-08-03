@@ -205,7 +205,7 @@ public class LMOFreeformDisplayAdapter extends DisplayAdapter {
         @Override
         public void performTraversalLocked(SurfaceControl.Transaction t) {
             if ((mPendingChanges & PENDING_RESIZE) != 0) {
-                t.setDisplaySize(getDisplayTokenLocked(), mWidth, mHeight);
+                setDisplaySize(t, getDisplayTokenLocked(), mWidth, mHeight);
             }
             if ((mPendingChanges & PENDING_SURFACE_CHANGE) != 0) {
                 setSurfaceLocked(t, mSurface);
@@ -250,11 +250,11 @@ public class LMOFreeformDisplayAdapter extends DisplayAdapter {
                 if (mFlags.mShouldShowSystemDecorations) {
                     mInfo.flags |= DisplayDeviceInfo.FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS;
                 }
-                mInfo.type = Display.TYPE_OVERLAY;
+                mInfo.type = 6;   // Display.TYPE_OVERLAY (@hide)
                 mInfo.touch = DisplayDeviceInfo.TOUCH_VIRTUAL;
                 // The display is trusted since it is created by system.
                 mInfo.flags |= FLAG_TRUSTED;
-                mInfo.displayShape = DisplayShape.createDefaultDisplayShape(mInfo.width, mInfo.height, false);
+                mInfo.displayShape = createDefaultDisplayShape(mInfo.width, mInfo.height);
             }
             return mInfo;
         }
@@ -329,6 +329,30 @@ public class LMOFreeformDisplayAdapter extends DisplayAdapter {
 
         public void dispatchDisplayStopped() {
             sendEmptyMessage(MSG_ON_DISPLAY_STOPPED);
+        }
+    }
+
+    // SurfaceControl.Transaction#setDisplaySize is @hide; call it reflectively.
+    private static void setDisplaySize(SurfaceControl.Transaction t, IBinder token, int width,
+                                       int height) {
+        try {
+            SurfaceControl.Transaction.class.getMethod(
+                            "setDisplaySize", IBinder.class, int.class, int.class)
+                    .invoke(t, token, width, height);
+        } catch (Exception e) {
+            Slog.e(TAG, "setDisplaySize failed", e);
+        }
+    }
+
+    // DisplayShape#createDefaultDisplayShape is @hide; call it reflectively.
+    private static DisplayShape createDefaultDisplayShape(int width, int height) {
+        try {
+            return (DisplayShape) DisplayShape.class.getMethod(
+                            "createDefaultDisplayShape", int.class, int.class, boolean.class)
+                    .invoke(null, width, height, false);
+        } catch (Exception e) {
+            Slog.w(TAG, "createDefaultDisplayShape failed, leaving shape null", e);
+            return null;
         }
     }
 }

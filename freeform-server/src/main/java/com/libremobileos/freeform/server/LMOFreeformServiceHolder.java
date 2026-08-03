@@ -79,9 +79,9 @@ public class LMOFreeformServiceHolder {
             intent.addCategory(Intent.CATEGORY_LAUNCHER);
             ActivityOptions activityOptions = ActivityOptions.makeBasic();
             activityOptions.setLaunchDisplayId(displayId);
-            activityOptions.setCallerDisplayId(displayId);
+            setCallerDisplayId(activityOptions, displayId);
             startActivityAsUser(context, intent, activityOptions.toBundle(),
-                    new UserHandle(appConfig.getUserId()));
+                    appConfig.getUserId());
             return true;
         } catch (Exception e) {
             Slog.e(TAG, "startApp failed", e);
@@ -93,11 +93,11 @@ public class LMOFreeformServiceHolder {
         try {
             android.content.pm.ActivityInfo info =
                     context.getPackageManager().getActivityInfo(component, 0);
-            int mode = info.resizeMode;
+            int mode = getResizeMode(info);
             // RESIZE_MODE_RESIZEABLE == 1, RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION == 2
             boolean resizeable = mode == 1 || mode == 2;
             boolean forced = WindowConfigStore.isForceResizeable(component.getPackageName());
-            Slog.i(TAG, "startApp resize check: " + component + " resizeMode=" + info.resizeMode
+            Slog.i(TAG, "startApp resize check: " + component + " resizeMode=" + mode
                     + " isResizeable=" + resizeable + " forceResizeableRule=" + forced
                     + (resizeable ? "" : " (may be letterboxed/reloaded)"));
         } catch (Exception e) {
@@ -108,11 +108,12 @@ public class LMOFreeformServiceHolder {
     public static void startPendingIntent(PendingIntent pendingIntent, int displayId) {
         ActivityOptions activityOptions = ActivityOptions.makeBasic();
         activityOptions.setLaunchDisplayId(displayId);
-        activityOptions.setCallerDisplayId(displayId);
+        setCallerDisplayId(activityOptions, displayId);
 
-        final IApplicationThread app = ActivityThread.currentActivityThread()
-                    .getApplicationThread();
         try {
+            Object thread = ActivityThread.currentActivityThread();
+            IApplicationThread app = (IApplicationThread) thread.getClass()
+                    .getMethod("getApplicationThread").invoke(thread);
             IIntentSender target = (IIntentSender) PendingIntent.class
                     .getMethod("getTarget").invoke(pendingIntent);
             IBinder whitelistToken = (IBinder) PendingIntent.class
@@ -133,10 +134,33 @@ public class LMOFreeformServiceHolder {
         }
     }
 
-    // Context#startActivityAsUser is @hide; call it reflectively.
-    private static void startActivityAsUser(Context context, Intent intent, Bundle options,
-                                            UserHandle user) {
+    // ActivityInfo#resizeMode is @hide; read it reflectively.
+    private static int getResizeMode(android.content.pm.ActivityInfo info) {
         try {
+            java.lang.reflect.Field field =
+                    android.content.pm.ActivityInfo.class.getDeclaredField("resizeMode");
+            field.setAccessible(true);
+            return field.getInt(info);
+        } catch (Exception e) {
+            return -1;
+        }
+    }
+
+    // ActivityOptions#setCallerDisplayId is @hide; call it reflectively.
+    private static void setCallerDisplayId(ActivityOptions activityOptions, int displayId) {
+        try {
+            ActivityOptions.class.getMethod("setCallerDisplayId", int.class)
+                    .invoke(activityOptions, displayId);
+        } catch (Exception e) {
+            Slog.e(TAG, "setCallerDisplayId failed", e);
+        }
+    }
+
+    // Context#startActivityAsUser and the UserHandle(int) constructor are @hide; call reflectively.
+    private static void startActivityAsUser(Context context, Intent intent, Bundle options,
+                                            int userId) {
+        try {
+            Object user = UserHandle.class.getConstructor(int.class).newInstance(userId);
             Context.class.getMethod("startActivityAsUser",
                             Intent.class, Bundle.class, UserHandle.class)
                     .invoke(context, intent, options, user);
